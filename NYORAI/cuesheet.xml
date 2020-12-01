@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso_project image_name="image.bin" cue_sheet="image.cue" no_xa="1">
+	<track type="data">
+	
+			<!-- <identifiers>
+				Optional, Specifies the identifier strings to use for the data track.
+				
+			Attributes:
+				system			- Optional, specifies the system identifier (PLAYSTATION if unspecified).
+				application		- Optional, specifies the application identifier (PLAYSTATION if unspecified).
+				volume			- Optional, specifies the volume identifier.
+				volume_set		- Optional, specifies the volume set identifier.
+				publisher		- Optional, specifies the publisher identifier.
+				data_preparer	- Optional, specifies the data preparer identifier. If unspecified, MKPSXISO
+								  will fill it with lengthy text telling that the image file was generated
+								  using MKPSXISO.
+		-->
+		<identifiers
+			system			="PLAYSTATION"
+			application		="PLAYSTATION"
+			volume			="MYDISC"
+			volume_set		="MYDISC"
+			publisher		="MYPUBLISHER"
+			data_preparer		="MKPSXISO"
+		/>
+		
+	
+		<license file="LICENSEE.DAT"/>
+		<directory_tree>
+			<file name="SYSTEM.CNF"	type="data"	source="SYSTEM.CNF"/>
+			<file name="PD1.TIM"	type="data"	source="data/PD1.TIM"/>
+			<file name="PD2.TIM"	type="data"	source="data/PD2.TIM"/>
+			<file name="PL1.TIM"	type="data"	source="data/PL1.TIM"/>
+			<file name="PL2.TIM"	type="data"	source="data/PL2.TIM"/>
+			<file name="PR1.TIM"	type="data"	source="data/PR1.TIM"/>
+			<file name="PR2.TIM"	type="data"	source="data/PR2.TIM"/>
+			<file name="PU1.TIM"	type="data"	source="data/PU1.TIM"/>
+			<file name="PU2.TIM"	type="data"	source="data/PU2.TIM"/>
+			<file name="SP1.TIM"	type="data"	source="data/SP1.TIM"/>
+			<file name="SP2.TIM"	type="data"	source="data/SP2.TIM"/>
+			<file name="ROTUE1.TIM"	type="data"	source="data/ROTUE1.TIM"/>
+			<file name="ROTUE2.TIM"	type="data"	source="data/ROTUE2.TIM"/>
+			<file name="ROTUE3.TIM"	type="data"	source="data/ROTUE3.TIM"/>
+			<file name="ARRUP.TIM"	type="data"	source="data/ARRUP.TIM"/>
+			<file name="ARRRIGHT.TIM"	type="data"	source="data/ARRRIGHT.TIM"/>
+			<file name="ARRLEFT.TIM"	type="data"	source="data/ARRLEFT.TIM"/>
+			<file name="ARRDOWN.TIM"	type="data"	source="data/ARRDOWN.TIM"/>
+			<file name="PD.TIM"	type="data"	source="data/PD.TIM"/>
+			<file name="SP3.TIM"	type="data"	source="data/SP3.TIM"/>
+			<file name="ATTACK.VAG"	type="data"	source="data/ATTACK.VAG"/>
+			<file name="DEATH.VAG"	type="data"	source="data/DEATH.VAG"/>
+			<file name="WALK.VAG"	type="data"	source="data/WALK.VAG"/>
+			<file name="POTION.TIM"	type="data"	source="data/POTION.TIM"/>
+			<file name="NPC.TIM"	type="data"	source="data/NPC.TIM"/>
+			<file name="TOWN.TIM"	type="data"	source="data/TOWN.TIM"/>
+			<file name="GOLD.TIM"	type="data"	source="data/GOLD.TIM"/>
+			<file name="EMPTY.TIM"	type="data"	source="data/EMPTY.TIM"/>
+			<file name="MENUBG.TIM"	type="data"	source="data/MENUBG.TIM"/>
+			<file name="MENUCR.TIM"	type="data"	source="data/MENUCR.TIM"/>
+			<file name="ARROW.TIM"	type="data"	source="data/ARROW.TIM"/>
+			<file name="MENUBGM.VAG"	type="data"	source="data/MENUBGM.VAG"/>
+			
+
+			<file name="MAIN.EXE"	type="data"	source="MAIN.EXE"/>
+			<!-- Add your own files or folders here -->
+			<dummy sectors="1024"/>
+		</directory_tree>
+	</track>
+	
+		<track type="audio" source="AUDIO/MENUBGM.wav"/>
+
+	
+	
+</iso_project>
