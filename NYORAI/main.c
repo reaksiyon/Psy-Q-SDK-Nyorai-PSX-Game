@@ -4,11 +4,34 @@
 #include "misc.h"
 
 
+/* C89-compatible boolean type for the original PlayStation SDK. */
 typedef enum { false, true } bool;
 
-void initialize();
-void update();
-void draw();
+void initialize(void);
+void update(void);
+void draw(void);
+void InitGAME(void);
+void mapTeleportCheck(void);
+void newMap(void);
+void respawnNPC(void);
+void respawnMonster(void);
+void playerAttack(void);
+void useItem(void);
+void takeItem(void);
+void mobDead(void);
+void checkPlayerLv(void);
+void monsterMovement(void);
+void gameOver(void);
+void walkSound(void);
+void updateMenu(void);
+void InitPlayer(void);
+void InitMonster(void);
+void drawHit(void);
+void drawStats(void);
+void drawMenu(void);
+static void moveMonster(Sprite **sprite, int *x, int *y, int health, int frame);
+static void processMonsterDeath(int *health, bool *firstDeath, int x, int y, int spriteIndex);
+static void applyMonsterContactDamage(int x, int y, int health);
 
 Color* color;
 u_long* data[34]; //++ when new data added
@@ -233,6 +256,7 @@ void newMap()
 		firstm1 = true;
 		firstm2 = true;
 		firstm3 = true;
+        takeable = false;
 	
 		townCount++;
 		
@@ -397,15 +421,15 @@ void takeItem()
 		if(dropID == 3)
 		{
 		Ppot++;
-		sprite_create((u_char *)data[26], Mx, My, &sprites[7]); // ITEM REMOVE
+		sprite_create((u_char *)data[26], DItemX, DItemY, &sprites[7]); // ITEM REMOVE
 		}
 		if(dropID == 5)
 		{
 		Pgold+=10;
-		sprite_create((u_char *)data[26], Mx, My, &sprites[7]); //ITEM REMOVE
+		sprite_create((u_char *)data[26], DItemX, DItemY, &sprites[7]); //ITEM REMOVE
 		}
 		
-		takeable == false;
+		takeable = false;
 		
 	}
 	
@@ -413,447 +437,95 @@ void takeItem()
 	
 }
 
-void mobDead()
+/* All three enemies use the same drop, EXP and death animation rules. */
+static void processMonsterDeath(int *health, bool *firstDeath, int x, int y, int spriteIndex)
 {
+    if (*health > 0 || !*firstDeath) return;
 
-	
-		if(Mhealth<=0) //ON ENEMY DEAD
-	{
-		if(firstm1 == true)
-		{
-		dHit = 0;
-			
+    dHit = 0;
+    MrandDrop = 1 + rand() % 8;
+    if (MrandDrop == 3 || MrandDrop == 5) {
+        dropID = MrandDrop;
+        sprite_create((u_char *)data[dropID == 3 ? 22 : 25], x, y, &sprites[7]);
+        DItemX = x;
+        DItemY = y;
+        takeable = true;
+    }
 
-			MrandDrop = 1+rand()%8;
-			
-			if(MrandDrop == 3)
-			{
-				sprite_create((u_char *)data[22], Mx, My, &sprites[7]); //potion drop
-				dropID = 3; //pot ID
-				takeable = true;
-			}
-			
-			if(MrandDrop == 5)
-			{
-				sprite_create((u_char *)data[25], Mx, My, &sprites[7]); //potion drop
-				dropID = 5; //gold ID
-				takeable = true;
-			}
-
-	Pexp += 10;
-	checkPlayerLv();
-	sprite_create((u_char *)data[26], Mx, My, &sprites[1]);
-	DItemX = Mx;
-	DItemY = My;
-	
-	audio_init();
+    Pexp += 10;
+    checkPlayerLv();
+    sprite_create((u_char *)data[26], x, y, &sprites[spriteIndex]);
+    audio_init();
     audio_transfer_vag_to_spu((u_char *)data[20], SECTOR * 21, SPU_00CH);
     audio_play(SPU_00CH);
-    //free3(data[20]);
-	firstm1 = false;
-
-		
-
-		}
-	}
-	
-	
-			if(Mhealth2<=0) //ON ENEMY DEAD
-	{
-		if(firstm2 == true)
-		{
-		dHit = 0;
-			
-		
-			MrandDrop = 1+rand()%8;
-			
-			if(MrandDrop == 3)
-			{
-				sprite_create((u_char *)data[22], Mx2, My2, &sprites[7]); //potion drop
-				dropID = 3; //pot ID
-				takeable = true;
-			}
-			
-			if(MrandDrop == 5)
-			{
-				sprite_create((u_char *)data[25], Mx2, My2, &sprites[7]); //potion drop
-				dropID = 5; //gold ID
-				takeable = true;
-			}
-
-	Pexp += 10;
-	checkPlayerLv();
-	sprite_create((u_char *)data[26], Mx, My, &sprites[14]);
-	DItemX = Mx2;
-	DItemY = My2;
-	
-	audio_init();
-    audio_transfer_vag_to_spu((u_char *)data[20], SECTOR * 21, SPU_00CH);
-    audio_play(SPU_00CH);
-    //free3(data[20]);
-	firstm2 = false;
-		
-		}
-	}
-	
-	
-			if(Mhealth3<=0) //ON ENEMY DEAD
-	{
-		
-		if(firstm3 == true)
-		{
-				
-		dHit = 0;
-			
-
-			MrandDrop = 1+rand()%8;
-			
-			if(MrandDrop == 3)
-			{
-				sprite_create((u_char *)data[22], Mx3, My3, &sprites[7]); //potion drop
-				dropID = 3; //pot ID
-				takeable = true;
-			}
-			
-			if(MrandDrop == 5)
-			{
-				sprite_create((u_char *)data[25], Mx3, My3, &sprites[7]); //potion drop
-				dropID = 5; //gold ID
-				takeable = true;
-			}
-
-	Pexp += 10;
-	checkPlayerLv();
-	sprite_create((u_char *)data[26], Mx, My, &sprites[15]);
-	DItemX = Mx3;
-	DItemY = My3;
-	
-	audio_init();
-    audio_transfer_vag_to_spu((u_char *)data[20], SECTOR * 21, SPU_00CH);
-    audio_play(SPU_00CH);
-    //free3(data[20]);
-	firstm3 = false;
-		
-
-		}
-	}
-	
-	
-	if(Mhealth <= 0 && Mhealth2 <= 0 && Mhealth3<= 0)
-			mapclean=true;
-	
-	
+    *firstDeath = false;
 }
 
-void checkPlayerLv()
+void mobDead(void)
 {
-	if(Pexp>50 && Plevel == 1)
-	{
-		Plevel++;
-		Pdmg+=2;
-		Pexp = 0;
-		PmaxHealth += 20;
-	}
-	
-	if(Pexp>60 && Plevel == 2)
-	{
-		Plevel++;
-		Pdmg+=2;
-		Pexp=0;
-		PmaxHealth += 20;
-	}
-	
-	if(Pexp>70 && Plevel == 3)
-	{
-		Plevel++;
-		Pdmg+=2;
-		Pexp=0;
-		PmaxHealth += 20;
-	}
-	
-	if(Pexp>80 && Plevel == 4)
-	{
-		Plevel++;
-		Pdmg+=2;
-		Pexp=0;
-		PmaxHealth += 20;
-	}
-	
-	if(Pexp>90 && Plevel == 5)
-	{
-		Plevel++;
-		Pdmg+=2;
-		Pexp=0;
-		PmaxHealth += 20;
-	}
-	
+    processMonsterDeath(&Mhealth, &firstm1, Mx, My, 1);
+    processMonsterDeath(&Mhealth2, &firstm2, Mx2, My2, 14);
+    processMonsterDeath(&Mhealth3, &firstm3, Mx3, My3, 15);
+
+    if (Mhealth <= 0 && Mhealth2 <= 0 && Mhealth3 <= 0)
+        mapclean = true;
 }
-void monsterMovement(){
-
-		Mx = sprites[1]->x;
-		My = sprites[1]->y;
-		
-		Mx2 = sprites[14]->x;
-		My2 = sprites[14]->y;
-		
-		Mx3 = sprites[15]->x;
-		My3 = sprites[15]->y;
-		
 
 
-
-				//MONSTER_MOVEMENT
-if(change)
-{	
-//mons1
-if(Mhealth>=0)
+void checkPlayerLv(void)
 {
-		if(Mx>Px)
-		{
-		sprites[1]->x -= Mspeed;
-		Mx -= Mspeed;
-		sprite_create((u_char *)data[8], Mx, My, &sprites[1]);
-		}
-		else
-		{
-		sprites[1]->x += Mspeed;
-		Mx += Mspeed;
-		sprite_create((u_char *)data[8], Mx, My, &sprites[1]);
-		}
-	
-		if(My>Py)
-		{
-		sprites[1]->y -= Mspeed;
-		My -= Mspeed;
-		sprite_create((u_char *)data[8], Mx, My, &sprites[1]);
-		
-		}
-		else
-		{
-		sprites[1]->y += Mspeed;
-		My += Mspeed;
-		sprite_create((u_char *)data[8], Mx, My, &sprites[1]);
-		
-		}
-		
+    /* Original thresholds: level 1 -> 2 at EXP > 50, etc. */
+    if (Plevel >= 1 && Plevel <= 5 && Pexp > (40 + Plevel * 10)) {
+        Plevel++;
+        Pdmg += 2;
+        Pexp = 0;
+        PmaxHealth += 20;
+    }
 }
 
-//mons2
-
-if(Mhealth2>=0)
+/* Move each living monster toward the player and alternate animation frames. */
+static void moveMonster(Sprite **sprite, int *x, int *y, int health, int frame)
 {
-		if(Mx2>Px)
-		{
-		sprites[14]->x -= Mspeed;
-		Mx2 -= Mspeed;
-		sprite_create((u_char *)data[8], Mx2, My2, &sprites[14]);
-		}
-		else
-		{
-		sprites[14]->x += Mspeed;
-		Mx2 += Mspeed;
-		sprite_create((u_char *)data[8], Mx2, My2, &sprites[14]);
-		}
-	
-		if(My2>Py)
-		{
-		sprites[14]->y -= Mspeed;
-		My2 -= Mspeed;
-		sprite_create((u_char *)data[8], Mx2, My2, &sprites[14]);
-		
-		}
-		else
-		{
-		sprites[14]->y += Mspeed;
-		My2 += Mspeed;
-		sprite_create((u_char *)data[8], Mx2, My2, &sprites[14]);
-		
-		}
-		
-}
-		
-//mons3
+    if (health <= 0 || sprite == 0 || *sprite == 0) return;
 
-if(Mhealth3>=0)
+    *x = (*sprite)->x;
+    *y = (*sprite)->y;
+    if (*x > Px) *x -= Mspeed;
+    else if (*x < Px) *x += Mspeed;
+    if (*y > Py) *y -= Mspeed;
+    else if (*y < Py) *y += Mspeed;
+
+    sprite_create((u_char *)data[frame], *x, *y, sprite);
+}
+
+static void applyMonsterContactDamage(int x, int y, int health)
 {
-	
-		if(Mx3>Px)
-		{
-		sprites[15]->x -= Mspeed;
-		Mx3 -= Mspeed;
-		sprite_create((u_char *)data[8], Mx3, My3, &sprites[15]);
-		}
-		else
-		{
-		sprites[15]->x += Mspeed;
-		Mx3 += Mspeed;
-		sprite_create((u_char *)data[8], Mx3, My3, &sprites[15]);
-		}
-	
-		if(My3>Py)
-		{
-		sprites[15]->y -= Mspeed;
-		My3 -= Mspeed;
-		sprite_create((u_char *)data[8], Mx3, My3, &sprites[15]);
-		
-		}
-		else
-		{
-		sprites[15]->y += Mspeed;
-		My3 += Mspeed;
-		sprite_create((u_char *)data[8], Mx3, My3, &sprites[15]);
-		
-		}	
-		
+    if (health <= 0 || gameover != 0) return;
+    if (abs(Py - y) <= 20 && abs(Px - x) <= 20) {
+        if (Phealth > 0) {
+            Phealth -= 5;
+            if (Phealth <= 0) gameOver();
+        } else {
+            gameOver();
+        }
+    }
 }
-	change=!change;
-}
-else
+
+void monsterMovement(void)
 {
-	if(Mhealth>=0)
-	{
-		if(Mx>Px)
-		{
-		sprites[1]->x -= Mspeed;
-		Mx -= Mspeed;
-		sprite_create((u_char *)data[9], Mx, My, &sprites[1]);
-		}
-		else
-		{
-		sprites[1]->x += Mspeed;
-		Mx += Mspeed;
-		sprite_create((u_char *)data[9], Mx, My, &sprites[1]);
-		}
-	
-		if(My>Py)
-		{
-		sprites[1]->y -= Mspeed;
-		My -= Mspeed;
-		sprite_create((u_char *)data[9], Mx, My, &sprites[1]);
-		
-		}
-		else
-		{
-		sprites[1]->y += Mspeed;
-		My += Mspeed;
-		sprite_create((u_char *)data[9], Mx, My, &sprites[1]);
-		
-		}
-		
-	}
-	
-	if(Mhealth2>=0)
-	{
-		//mons2
-			if(Mx2>Px)
-		{
-		sprites[14]->x -= Mspeed;
-		Mx2 -= Mspeed;
-		sprite_create((u_char *)data[9], Mx2, My2, &sprites[14]);
-		}
-		else
-		{
-		sprites[14]->x += Mspeed;
-		Mx2 += Mspeed;
-		sprite_create((u_char *)data[9], Mx2, My2, &sprites[14]);
-		}
-	
-		if(My2>Py)
-		{
-		sprites[14]->y -= Mspeed;
-		My2 -= Mspeed;
-		sprite_create((u_char *)data[9], Mx2, My2, &sprites[14]);
-		
-		}
-		else
-		{
-		sprites[14]->y += Mspeed;
-		My2 += Mspeed;
-		sprite_create((u_char *)data[9], Mx2, My2, &sprites[14]);
-		
-		}
-	}
-	
-	
-//mons3
+    int frame = change ? 8 : 9;
 
-	if(Mhealth3>=0)
-	{
-		if(Mx3>Px)
-		{
-		sprites[15]->x -= Mspeed;
-		Mx3 -= Mspeed;
-		sprite_create((u_char *)data[9], Mx3, My3, &sprites[15]);
-		}
-		else
-		{
-		sprites[15]->x += Mspeed;
-		Mx3 += Mspeed;
-		sprite_create((u_char *)data[9], Mx3, My3, &sprites[15]);
-		}
-	
-		if(My3>Py)
-		{
-		sprites[15]->y -= Mspeed;
-		My3 -= Mspeed;
-		sprite_create((u_char *)data[9], Mx3, My3, &sprites[15]);
-		
-		}
-		else
-		{
-		sprites[15]->y += Mspeed;
-		My3 += Mspeed;
-		sprite_create((u_char *)data[9], Mx3, My3, &sprites[15]);
-		
-		}	
-		
-	}
+    /* Keep the original sprite slots and monster state variables. */
+    moveMonster(&sprites[1], &Mx, &My, Mhealth, frame);
+    moveMonster(&sprites[14], &Mx2, &My2, Mhealth2, frame);
+    moveMonster(&sprites[15], &Mx3, &My3, Mhealth3, frame);
+    change = !change;
 
-	
-	change=!change;
+    applyMonsterContactDamage(Mx, My, Mhealth);
+    applyMonsterContactDamage(Mx2, My2, Mhealth2);
+    applyMonsterContactDamage(Mx3, My3, Mhealth3);
 }
 
-			//GAMEOVER
-			if((abs(Py-My)<=20 && abs(Px-Mx)<=20))
-			{
-				if(Phealth>0)
-				{
-				Phealth-=5;
-				}
-				else{
-				gameOver();	
-					
-				}
-	
-			}
-			
-			if((abs(Py-My2)<=20 && abs(Px-Mx2)<=20))
-			{
-				if(Phealth>0)
-				{
-				Phealth-=5;
-				}
-				else{
-				gameOver();	
-					
-				}
-				
-			}
-			
-			if((abs(Py-My3)<=20 && abs(Px-Mx3)<=20))
-			{
-				if(Phealth>0)
-				{
-				Phealth-=5;
-				}
-				else{
-				gameOver();	
-					
-				}	
-			}
-
-	
-}
 
 
 
@@ -1151,7 +823,7 @@ void drawStats() {
 }
 
 
-drawMenu()
+void drawMenu(void)
 {
 	/*
 		FntPrint("----DEBUG----\n");
@@ -1199,7 +871,6 @@ void draw() { //layers
 	
 }
 	
-
 
 
 
